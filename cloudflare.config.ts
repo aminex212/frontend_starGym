@@ -1,0 +1,18 @@
+import { bindings, defineConfig, defineWorker } from "cf/config";
+
+export default defineConfig({
+  worker: defineWorker({
+    name: "frontend-stargym",
+    workersDev: true,
+    entrypoint: "vinext/server/fetch-handler",
+    compatibilityDate: "2026-10-04",
+    compatibilityFlags: ["nodejs_compat"],
+    assets: {
+      notFoundHandling: "none",
+      runWorkerFirst: ["/*"],
+    },
+    env: {
+      ASSETS: bindings.assets(),
+    },
+  }),
+});

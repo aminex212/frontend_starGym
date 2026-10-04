@@ -9,7 +9,6 @@ export default defineConfig({
     compatibilityFlags: ["nodejs_compat"],
     assets: {
       notFoundHandling: "none",
-      runWorkerFirst: ["/*"],
     },
     env: {
       ASSETS: bindings.assets(),

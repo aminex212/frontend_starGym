@@ -1,4 +1,8 @@
-export const API_URL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+const configuredApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+
+export const API_URL = (
+    configuredApiUrl || "https://stargymdashboard.netlify.app"
+).replace(/\/$/, "");
 
 export function saveSession(data: { csrfToken: string; user: unknown }) {
     sessionStorage.setItem("csrfToken", data.csrfToken);

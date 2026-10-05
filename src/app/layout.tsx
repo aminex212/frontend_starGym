@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${poppins.variable} min-h-screen bg-background antialiased`}>
+      <body className={`${poppins.variable} ${poppins.className} min-h-screen bg-background antialiased`}>
         <ThemeProvider>
           <AuthGuard>{children}</AuthGuard>
         </ThemeProvider>

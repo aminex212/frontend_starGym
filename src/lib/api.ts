@@ -1,7 +1,14 @@
 const configuredApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+const productionApiUrl = "https://stargymdashboard.netlify.app";
+const normalizedConfiguredApiUrl = configuredApiUrl?.replace(/\/$/, "");
+const isAllowedApiUrl =
+    normalizedConfiguredApiUrl === productionApiUrl ||
+    /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(
+        normalizedConfiguredApiUrl || ""
+    );
 
 export const API_URL = (
-    configuredApiUrl || "https://stargymdashboard.netlify.app"
+    isAllowedApiUrl ? normalizedConfiguredApiUrl : productionApiUrl
 ).replace(/\/$/, "");
 
 export function saveSession(data: { csrfToken: string; user: unknown }) {

@@ -58,6 +58,7 @@ type Payment = {
     amount: number;
     paymentDate: string;
     month: string;
+    year: number;
     status: "Paid" | "Unpaid";
     createdAt: string;
 };
@@ -107,13 +108,6 @@ export default function DashboardPage() {
     try {
         setLoading(true);
 
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            router.push("/login");
-            return;
-        }
-
         const [
             membersResponse,
             paymentsResponse,
@@ -135,7 +129,6 @@ export default function DashboardPage() {
             competitionsResponse.status === 401 ||
             participantsResponse.status === 401
         ) {
-            localStorage.removeItem("token");
             localStorage.removeItem("user");
 
             router.push("/login");
@@ -443,7 +436,7 @@ export default function DashboardPage() {
                                                 </p>
 
                                                 <p className="text-xs text-muted-foreground">
-                                                    {payment.month}{" "}
+                                                    {payment.month} {payment.year}{" "}
                                                     ·{" "}
                                                     {payment.amount}{" "}
                                                     DH

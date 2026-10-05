@@ -13,8 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -36,8 +35,8 @@ export default function ForgotPasswordPage() {
     try {
       setLoading(true);
 
-      const response = await fetch(
-        `${API_URL}/api/auth/forgot-password`,
+      const response = await apiFetch(
+        "/api/auth/forgot-password",
         {
           method: "POST",
           headers: {

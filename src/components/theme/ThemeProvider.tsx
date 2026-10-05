@@ -19,16 +19,15 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as Theme | null;
-
-    if (savedTheme === "dark" || savedTheme === "light") {
-      setTheme(savedTheme);
-      document.documentElement.classList.toggle(
-        "dark",
-        savedTheme === "dark"
-      );
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      void Promise.resolve().then(() => setTheme("dark"));
     }
   }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
 
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
@@ -36,10 +35,6 @@ export function ThemeProvider({
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
 
-    document.documentElement.classList.toggle(
-      "dark",
-      newTheme === "dark"
-    );
   };
 
   return (

@@ -48,18 +48,8 @@ export default function AddCompetitionDialog({
         try {
             setLoading(true);
 
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                throw new Error("Your session has expired. Please log in again.");
-            }
-
             const response = await apiFetch("/api/competitions", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
                 body: JSON.stringify({
                     name,
                     date,

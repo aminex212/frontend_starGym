@@ -13,7 +13,6 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useRouter } from "next/navigation";
 import { Label } from "../ui/label";
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/api";
@@ -67,26 +66,24 @@ export default function UpdateMemberDialog({
     const [age, setAge] = useState("");
     const [selectedDisciplines, setSelectedDisciplines] = useState<string[]>([]);
     const [status, setStatus] = useState<"Active" | "Out">("Active");
-    const [paymentStatus, setPaymentStatus] = useState<"Paid" | "Unpaid">("Unpaid");
     const [insuranceStatus, setInsuranceStatus] = useState<"Paid" | "Unpaid">("Unpaid");
     const [groups, setGroups] = useState<TrainingGroup[]>([]);
     const [selectedGroup, setSelectedGroup] = useState("");
 
     const [photo, setPhoto] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
-    const router = useRouter();
-
     useEffect(() => {
         if (member) {
-            setName(member.name);
-            setPhone(member.phone);
-            setAge(String(member.age));
-            setSelectedDisciplines(member.disciplines ?? []);
-            setStatus(member.status);
-            setPaymentStatus(member.paymentStatus);
-            setInsuranceStatus(member.insuranceStatus);
-            setSelectedGroup(member.group?._id || "");
-            setPhoto(null);
+            void Promise.resolve().then(() => {
+                setName(member.name);
+                setPhone(member.phone);
+                setAge(String(member.age));
+                setSelectedDisciplines(member.disciplines ?? []);
+                setStatus(member.status);
+                setInsuranceStatus(member.insuranceStatus);
+                setSelectedGroup(member.group?._id || "");
+                setPhoto(null);
+            });
         }
     }, [member]);
 
@@ -148,25 +145,14 @@ export default function UpdateMemberDialog({
             );
             formData.set("group", selectedGroup);
             formData.set("status", status);
-            formData.set("paymentStatus", paymentStatus);
             formData.set("insuranceStatus", insuranceStatus);
 
             if (photo) {
                 formData.set("photo", photo);
             }
 
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                router.push("/login");
-                return;
-            }
-
             const response = await apiFetch(`/api/members/${member._id}`, {
                 method: "PUT",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
                 body: formData,
             });
 

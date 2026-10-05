@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 
-import { apiFetch } from "@/lib/api";
+import { apiFetch, saveSession } from "@/lib/api";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -44,11 +44,7 @@ export default function LoginPage() {
                 );
             }
 
-            localStorage.setItem("token", data.token);
-            localStorage.setItem(
-                "user",
-                JSON.stringify(data.user)
-            );
+            saveSession(data);
 
             router.push("/dashboard");
         } catch (error) {

@@ -91,7 +91,7 @@ export default function TrainingGroupsPage() {
     }
 
     useEffect(() => {
-        fetchGroups();
+        void Promise.resolve().then(fetchGroups);
     }, []);
 
     async function handleDelete(group: TrainingGroup) {

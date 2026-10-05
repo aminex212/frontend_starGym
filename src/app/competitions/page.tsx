@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -47,21 +47,13 @@ export default function CompetitionsPage() {
     const [updateCompetition, setUpdateCompetition] = useState<Competition | null>(null);
     const [competitionToDelete, setCompetitionToDelete] = useState<Competition | null>(null);
 
-    async function fetchCompetitions() {
+    const fetchCompetitions = useCallback(async () => {
         try {
             setLoading(true);
-
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                router.push("/login");
-                return;
-            }
 
             const response = await apiFetch("/api/competitions");
 
             if (response.status === 401) {
-                localStorage.removeItem("token");
                 localStorage.removeItem("user");
                 router.push("/login");
                 return;
@@ -84,29 +76,21 @@ export default function CompetitionsPage() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [router]);
 
     useEffect(() => {
-        fetchCompetitions();
-    }, [router]);
+        void Promise.resolve().then(fetchCompetitions);
+    }, [fetchCompetitions]);
 
     async function handleDelete(
         competition: Competition
     ) {
         try {
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                router.push("/login");
-                return;
-            }
-
             const response = await apiFetch(`/api/competitions/${competition._id}`, {
                 method: "DELETE",
             });
 
             if (response.status === 401) {
-                localStorage.removeItem("token");
                 localStorage.removeItem("user");
                 router.push("/login");
                 return;

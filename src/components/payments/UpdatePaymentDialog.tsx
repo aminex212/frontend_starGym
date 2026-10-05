@@ -28,6 +28,7 @@ type Payment = {
     amount: number;
     paymentDate: string;
     month: string;
+    year: number;
     status: "Paid" | "Unpaid";
 };
 
@@ -61,6 +62,7 @@ export default function UpdatePaymentDialog({
 }: UpdatePaymentDialogProps) {
     const [amount, setAmount] = useState("");
     const [month, setMonth] = useState("");
+    const [year, setYear] = useState(String(new Date().getFullYear()));
     const [paymentDate, setPaymentDate] = useState("");
     const [status, setStatus] = useState<"Paid" | "Unpaid">("Unpaid");
 
@@ -72,6 +74,7 @@ export default function UpdatePaymentDialog({
         void Promise.resolve().then(() => {
             setAmount(String(payment.amount));
             setMonth(payment.month);
+            setYear(String(payment.year || new Date().getFullYear()));
             setStatus(payment.status);
 
             if (payment.paymentDate) {
@@ -96,21 +99,12 @@ export default function UpdatePaymentDialog({
         try {
             setLoading(true);
 
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                return;
-            }
-
             const response = await apiFetch(`/api/payments/${payment._id}`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
                 body: JSON.stringify({
                     amount: Number(amount),
                     month,
+                    year: Number(year),
                     paymentDate,
                     status,
                 }),
@@ -215,6 +209,20 @@ export default function UpdatePaymentDialog({
                                     </option>
                                 ))}
                             </select>
+                        </div>
+
+                        {/* Year */}
+                        <div className="space-y-2">
+                            <Label htmlFor="update-year">Year</Label>
+                            <Input
+                                id="update-year"
+                                type="number"
+                                min="2000"
+                                max="2100"
+                                value={year}
+                                onChange={(event) => setYear(event.target.value)}
+                                required
+                            />
                         </div>
 
                         {/* Payment Date */}

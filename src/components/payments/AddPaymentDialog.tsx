@@ -54,6 +54,7 @@ export default function AddPaymentDialog({
     const [member, setMember] = useState("");
     const [amount, setAmount] = useState("");
     const [month, setMonth] = useState("");
+    const [year, setYear] = useState(String(new Date().getFullYear()));
     const [paymentDate, setPaymentDate] = useState("");
     const [status, setStatus] = useState<"Paid" | "Unpaid">("Paid");
 
@@ -65,12 +66,6 @@ export default function AddPaymentDialog({
         async function fetchMembers() {
             try {
                 setLoadingMembers(true);
-
-                const token = localStorage.getItem("token");
-
-                if (!token) {
-                    return;
-                }
 
                 const response = await apiFetch("/api/members");
 
@@ -104,23 +99,14 @@ export default function AddPaymentDialog({
         try {
             setLoading(true);
 
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                return;
-            }
-
             const response = await apiFetch("/api/payments", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
                 body: JSON.stringify({
                     member,
                     amount: Number(amount),
                     paymentDate: paymentDate || undefined,
                     month,
+                    year: Number(year),
                     status,
                 }),
             });
@@ -138,6 +124,7 @@ export default function AddPaymentDialog({
             setMember("");
             setAmount("");
             setMonth("");
+            setYear(String(new Date().getFullYear()));
             setPaymentDate("");
             setStatus("Paid");
 
@@ -265,6 +252,20 @@ export default function AddPaymentDialog({
                                 </option>
                             ))}
                         </select>
+                    </div>
+
+                    {/* Year */}
+                    <div className="space-y-2">
+                        <Label htmlFor="year">Year</Label>
+                        <Input
+                            id="year"
+                            type="number"
+                            min="2000"
+                            max="2100"
+                            value={year}
+                            onChange={(event) => setYear(event.target.value)}
+                            required
+                        />
                     </div>
 
                     {/* Payment Date */}

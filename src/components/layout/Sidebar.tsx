@@ -14,6 +14,7 @@ import {
   Dumbbell,
   Clock,
 } from "lucide-react";
+import { apiFetch, clearSession } from "@/lib/api";
 
 const menuItems = [
   {
@@ -82,11 +83,13 @@ function SidebarContent() {
     };
   }, []);
 
-  function handleLogout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    router.replace("/login");
+  async function handleLogout() {
+    try {
+      await apiFetch("/api/auth/logout", { method: "POST" });
+    } finally {
+      clearSession();
+      router.replace("/login");
+    }
   }
 
   return (

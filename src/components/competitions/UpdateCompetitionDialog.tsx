@@ -48,19 +48,16 @@ export default function UpdateCompetitionDialog({
     useEffect(() => {
         if (!competition) return;
 
-        setName(competition.name);
-        setLocation(competition.location);
-        setDescription(competition.description || "");
-
-        if (competition.date) {
+        void Promise.resolve().then(() => {
+            setName(competition.name);
+            setLocation(competition.location);
+            setDescription(competition.description || "");
             setDate(
-                new Date(competition.date)
-                    .toISOString()
-                    .split("T")[0]
+                competition.date
+                    ? new Date(competition.date).toISOString().split("T")[0]
+                    : ""
             );
-        } else {
-            setDate("");
-        }
+        });
     }, [competition]);
 
     async function handleSubmit(
@@ -73,18 +70,8 @@ export default function UpdateCompetitionDialog({
         try {
             setLoading(true);
 
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                throw new Error("Your session has expired. Please log in again.");
-            }
-
             const response = await apiFetch(`/api/competitions/${competition._id}`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
                 body: JSON.stringify({
                     name,
                     date,

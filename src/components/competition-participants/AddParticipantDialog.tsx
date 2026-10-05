@@ -74,16 +74,6 @@ export default function AddParticipantDialog({
             try {
                 setLoadingData(true);
 
-                const token = localStorage.getItem("token");
-
-                if (!token) {
-                    throw new Error("Your session has expired. Please log in again.");
-                }
-
-                const headers = {
-                    Authorization: `Bearer ${token}`,
-                };
-
                 const [membersResponse, competitionsResponse] =
                     await Promise.all([
                         apiFetch("/api/members"),
@@ -147,18 +137,8 @@ export default function AddParticipantDialog({
         try {
             setLoading(true);
 
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                throw new Error("Your session has expired. Please log in again.");
-            }
-
             const response = await apiFetch("/api/competition-participants", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
                 body: JSON.stringify({
                     competition,
                     member,

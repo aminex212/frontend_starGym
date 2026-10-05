@@ -71,12 +71,14 @@ export default function UpdateTrainingGroupDialog({
             return;
         }
 
-        setName(group.name);
-        setDiscipline(group.discipline);
-        setStartTime(group.startTime);
-        setEndTime(group.endTime);
-        setDays(group.days || []);
-        setActive(group.active);
+        void Promise.resolve().then(() => {
+            setName(group.name);
+            setDiscipline(group.discipline);
+            setStartTime(group.startTime);
+            setEndTime(group.endTime);
+            setDays(group.days || []);
+            setActive(group.active);
+        });
     }, [group]);
 
     async function handleSubmit(

@@ -59,16 +59,6 @@ export default function UpdateCompetitionParticipantDialog({
 
         async function fetchData() {
             try {
-                const token = localStorage.getItem("token");
-
-                if (!token) {
-                    throw new Error("Your session has expired. Please log in again.");
-                }
-
-                const headers = {
-                    Authorization: `Bearer ${token}`,
-                };
-
                 const [membersResponse, competitionsResponse] =
                     await Promise.all([
                         apiFetch("/api/members"),
@@ -91,20 +81,13 @@ export default function UpdateCompetitionParticipantDialog({
 
     useEffect(() => {
         if (participant) {
-            setMember(participant.member?._id || "");
-            setCompetition(participant.competition?._id || "");
-
-            setCompetitionPayment(
-                participant.competitionPayment
-            );
-
-            setDocumentsStatus(
-                participant.documentsStatus
-            );
-
-            setIncompleteDocuments(
-                participant.incompleteDocuments || []
-            );
+            void Promise.resolve().then(() => {
+                setMember(participant.member?._id || "");
+                setCompetition(participant.competition?._id || "");
+                setCompetitionPayment(participant.competitionPayment);
+                setDocumentsStatus(participant.documentsStatus);
+                setIncompleteDocuments(participant.incompleteDocuments || []);
+            });
         }
     }, [participant]);
 
@@ -126,18 +109,8 @@ export default function UpdateCompetitionParticipantDialog({
         setLoading(true);
 
         try {
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                throw new Error("Your session has expired. Please log in again.");
-            }
-
             const response = await apiFetch(`/api/competition-participants/${participant._id}`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
                 body: JSON.stringify({
                     member,
                     competition,

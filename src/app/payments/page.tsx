@@ -48,6 +48,7 @@ type Payment = {
     amount: number;
     paymentDate: string;
     month: string;
+    year: number;
     status: "Paid" | "Unpaid";
 };
 
@@ -63,17 +64,9 @@ export default function PaymentsPage() {
 
     const fetchPayments = useCallback(async () => {
         try {
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                router.push("/login");
-                return;
-            }
-
             const response = await apiFetch("/api/payments");
 
             if (response.status === 401) {
-                localStorage.removeItem("token");
                 localStorage.removeItem("user");
                 router.push("/login");
                 return;
@@ -99,19 +92,11 @@ export default function PaymentsPage() {
 
     async function handleDelete(payment: Payment) {
         try {
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                router.push("/login");
-                return;
-            }
-
             const response = await apiFetch(`/api/payments/${payment._id}`, {
                 method: "DELETE",
             });
 
             if (response.status === 401) {
-                localStorage.removeItem("token");
                 localStorage.removeItem("user");
                 router.push("/login");
                 return;
@@ -207,6 +192,10 @@ export default function PaymentsPage() {
                                 </th>
 
                                 <th className="px-4 py-3 text-left">
+                                    Year
+                                </th>
+
+                                <th className="px-4 py-3 text-left">
                                     Amount
                                 </th>
 
@@ -228,7 +217,7 @@ export default function PaymentsPage() {
                             {loading ? (
                                 <tr>
                                     <td
-                                        colSpan={7}
+                                        colSpan={8}
                                         className="px-4 py-8 text-center text-muted-foreground"
                                     >
                                         Loading payments...
@@ -237,7 +226,7 @@ export default function PaymentsPage() {
                             ) : filteredPayments.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={7}
+                                        colSpan={8}
                                         className="px-4 py-8 text-center text-muted-foreground"
                                     >
                                         No payments found.
@@ -259,6 +248,10 @@ export default function PaymentsPage() {
 
                                         <td className="px-4 py-3">
                                             {payment.month}
+                                        </td>
+
+                                        <td className="px-4 py-3">
+                                            {payment.year}
                                         </td>
 
                                         <td className="px-4 py-3">

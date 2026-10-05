@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { apiFetch, clearSession } from "@/lib/api";
 
 import {
   Sheet,
@@ -25,8 +26,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const menuItems = [
   {
@@ -117,20 +116,9 @@ export default function Header() {
 
   async function loadNotifications() {
     try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       setLoadingNotifications(true);
 
-      const response = await fetch(`${API_URL}/api/notifications`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await apiFetch("/api/notifications");
 
       if (!response.ok) {
         throw new Error("Failed to load notifications");
@@ -148,7 +136,7 @@ export default function Header() {
 
   // Load notifications when Header mounts
   useEffect(() => {
-    loadNotifications();
+    void Promise.resolve().then(loadNotifications);
 
     // Refresh every 30 seconds
     const interval = setInterval(() => {
@@ -166,19 +154,10 @@ export default function Header() {
 
   async function markAsRead(id: string) {
     try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      const response = await fetch(
-        `${API_URL}/api/notifications/${id}/read`,
+      const response = await apiFetch(
+        `/api/notifications/${id}/read`,
         {
           method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
 
@@ -204,19 +183,10 @@ export default function Header() {
 
   async function markAllAsRead() {
     try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      const response = await fetch(
-        `${API_URL}/api/notifications/read-all`,
+      const response = await apiFetch(
+        "/api/notifications/read-all",
         {
           method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
 
@@ -237,17 +207,8 @@ export default function Header() {
 
   async function deleteNotification(id: string) {
     try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      const response = await fetch(`${API_URL}/api/notifications/${id}`, {
+      const response = await apiFetch(`/api/notifications/${id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       });
 
       if (!response.ok) {
@@ -274,11 +235,13 @@ export default function Header() {
   // Logout
   // =========================
 
-  function handleLogout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    router.replace("/login");
+  async function handleLogout() {
+    try {
+      await apiFetch("/api/auth/logout", { method: "POST" });
+    } finally {
+      clearSession();
+      router.replace("/login");
+    }
   }
 
   return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -41,21 +41,13 @@ export default function CompetitionParticipantsPage() {
     const [updateParticipant, setUpdateParticipant] = useState<Participant | null>(null);
     const [participantToDelete, setParticipantToDelete] = useState<Participant | null>(null);
 
-    async function fetchParticipants() {
+    const fetchParticipants = useCallback(async () => {
         try {
             setLoading(true);
-
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                router.push("/login");
-                return;
-            }
 
             const response = await apiFetch("/api/competition-participants");
 
             if (response.status === 401) {
-                localStorage.removeItem("token");
                 localStorage.removeItem("user");
                 router.push("/login");
                 return;
@@ -79,27 +71,19 @@ export default function CompetitionParticipantsPage() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [router]);
 
     useEffect(() => {
-        fetchParticipants();
-    }, [router]);
+        void Promise.resolve().then(fetchParticipants);
+    }, [fetchParticipants]);
 
     async function handleDelete(participant: Participant) {
         try {
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                router.push("/login");
-                return;
-            }
-
             const response = await apiFetch(`/api/competition-participants/${participant._id}`, {
                 method: "DELETE",
             });
 
             if (response.status === 401) {
-                localStorage.removeItem("token");
                 localStorage.removeItem("user");
                 router.push("/login");
                 return;

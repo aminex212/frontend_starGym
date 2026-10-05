@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
+import { apiFetch, clearSession, saveSession } from "@/lib/api";
 
 type AuthGuardProps = {
     children: React.ReactNode;
@@ -22,25 +23,43 @@ export default function AuthGuard({
     const router = useRouter();
     const pathname = usePathname();
 
-    const [checking, setChecking] = useState(true);
+    const [authorizedPath, setAuthorizedPath] = useState<string | null>(null);
 
     useEffect(() => {
-        if (publicPaths.includes(pathname)) {
-            void Promise.resolve().then(() => setChecking(false));
-            return;
-        }
+        let active = true;
 
-        const token = localStorage.getItem("token");
-
-        if (!token) {
+        const expireSession = () => {
+            clearSession();
             router.replace("/login");
-            return;
+        };
+
+        window.addEventListener("auth-session-expired", expireSession);
+
+        if (publicPaths.includes(pathname)) {
+            return () => {
+                active = false;
+                window.removeEventListener("auth-session-expired", expireSession);
+            };
         }
 
-        void Promise.resolve().then(() => setChecking(false));
+        void apiFetch("/api/auth/session")
+            .then(async (response) => {
+                if (!response.ok) throw new Error("Session expired");
+                const data = await response.json();
+                saveSession(data);
+                if (active) setAuthorizedPath(pathname);
+            })
+            .catch(() => {
+                if (active) expireSession();
+            });
+
+        return () => {
+            active = false;
+            window.removeEventListener("auth-session-expired", expireSession);
+        };
     }, [pathname, router]);
 
-    if (checking) {
+    if (!publicPaths.includes(pathname) && authorizedPath !== pathname) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <p className="text-muted-foreground">

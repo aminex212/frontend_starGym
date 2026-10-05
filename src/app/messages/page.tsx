@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import {
   MessageCircle,
   Search,
@@ -13,7 +14,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-import { apiFetch } from "@/lib/api";
+import { apiFetch, resolveApiAsset } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,7 @@ type Payment = {
   member?: { _id: string } | null;
   amount: number;
   month: string;
+  year: number;
 };
 
 export default function MessagesPage() {
@@ -75,6 +77,7 @@ export default function MessagesPage() {
           paymentsData.forEach((payment: Payment) => {
             if (
               payment.month === currentMonth &&
+              payment.year === new Date().getFullYear() &&
               payment.member?._id &&
               typeof payment.amount === "number"
             ) {
@@ -426,10 +429,13 @@ ${reminders.join("\n\n")}.
                   <div className="flex items-center gap-4">
                     {/* Avatar */}
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 font-semibold text-primary">
-                      {member.photo ? (
-                        <img
-                          src={member.photo}
+                      {resolveApiAsset(member.photo) ? (
+                        <Image
+                          src={resolveApiAsset(member.photo)!}
                           alt={member.name}
+                          width={48}
+                          height={48}
+                          unoptimized
                           className="h-full w-full object-cover"
                         />
                       ) : (

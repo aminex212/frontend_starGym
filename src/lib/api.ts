@@ -1,15 +1,31 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+export const API_URL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+
+export function saveSession(data: { csrfToken: string; user: unknown }) {
+    sessionStorage.setItem("csrfToken", data.csrfToken);
+    localStorage.setItem("user", JSON.stringify(data.user));
+}
+
+export function clearSession() {
+    sessionStorage.removeItem("csrfToken");
+    localStorage.removeItem("user");
+}
+
+export function resolveApiAsset(path: string | null) {
+    if (!path) return null;
+    if (/^(https?:|data:|blob:)/.test(path)) return path;
+    return `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
+}
 
 export async function apiFetch(
     endpoint: string,
     options: RequestInit = {}
 ) {
-    const token = localStorage.getItem("token");
-
     const headers = new Headers(options.headers);
+    const method = (options.method || "GET").toUpperCase();
+    const csrfToken = sessionStorage.getItem("csrfToken");
 
-    if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+    if (!["GET", "HEAD", "OPTIONS"].includes(method) && csrfToken) {
+        headers.set("X-CSRF-Token", csrfToken);
     }
 
     if (
@@ -24,17 +40,16 @@ export async function apiFetch(
         {
             ...options,
             headers,
+            credentials: "include",
         }
     );
 
     if (
         response.status === 401 &&
-        endpoint !== "/api/auth/login"
+        !["/api/auth/login", "/api/auth/session"].includes(endpoint)
     ) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-
-        window.location.href = "/login";
+        clearSession();
+        window.dispatchEvent(new Event("auth-session-expired"));
 
         throw new Error("Session expired");
     }

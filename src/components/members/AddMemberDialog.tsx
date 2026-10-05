@@ -15,7 +15,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/api";
 
@@ -36,8 +35,8 @@ type TrainingGroup = {
     name: string;
     discipline: string;
     startTime: string;
-    endTime: String;
-    active: Boolean;
+    endTime: string;
+    active: boolean;
 }
 
 export default function AddMemberDialog({
@@ -47,8 +46,6 @@ export default function AddMemberDialog({
     const [photo, setPhoto] = useState<File | null>(null);
     const [groups, setGroups] = useState<TrainingGroup[]>([]);
     const [selectedGroup, setSelectedGroup] = useState("");
-    const router = useRouter();
-
     useEffect(() => {
         async function fetchTrainingGroups() {
             const response = await apiFetch("/api/training-groups");
@@ -103,13 +100,6 @@ export default function AddMemberDialog({
             formData.set("photo", photo);
         }
 
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            router.push("/login");
-            return;
-        }
-
         if (selectedGroup) {
             formData.set("group", selectedGroup);
         } else {
@@ -119,9 +109,6 @@ export default function AddMemberDialog({
         try {
             const response = await apiFetch("/api/members", {
                 method: "POST",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
                 body: formData,
             });
 
@@ -135,14 +122,6 @@ export default function AddMemberDialog({
                 throw new Error(
                     `Server returned non-JSON response: ${text}`
                 );
-            }
-
-            if (response.status === 401) {
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
-
-                router.push("/login");
-                return;
             }
 
             if (!response.ok) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -19,10 +19,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
 
 export default function ResetPasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-background px-4">
+          <p className="text-sm text-muted-foreground">Loading reset form...</p>
+        </main>
+      }
+    >
+      <ResetPasswordForm />
+    </Suspense>
+  );
+}
+
+function ResetPasswordForm() {
   const searchParams = useSearchParams();
 
   const token = searchParams.get("token");
@@ -53,9 +66,9 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       setError(
-        "Password must be at least 6 characters."
+        "Password must be at least 8 characters."
       );
       return;
     }
@@ -68,8 +81,8 @@ export default function ResetPasswordPage() {
     try {
       setLoading(true);
 
-      const response = await fetch(
-        `${API_URL}/api/auth/reset-password`,
+      const response = await apiFetch(
+        "/api/auth/reset-password",
         {
           method: "POST",
           headers: {

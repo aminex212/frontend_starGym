@@ -2,7 +2,7 @@
 
 import { Moon, Sun, User, Settings as SettingsIcon } from "lucide-react";
 import { useTheme } from "@/components/theme/ThemeProvider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/api";
 import {
@@ -24,6 +24,21 @@ export default function SettingsPage() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+        if (!storedUser) return;
+
+        try {
+            const user = JSON.parse(storedUser) as { name?: string; email?: string };
+            void Promise.resolve().then(() => {
+                setName(user.name || "");
+                setEmail(user.email || "");
+            });
+        } catch {
+            // A fresh session check will restore malformed local display data.
+        }
+    }, []);
 
     return (
         <div className="space-y-6">
@@ -141,8 +156,6 @@ export default function SettingsPage() {
                                     );
                                 }
 
-                                setName("");
-                                setEmail("");
                                 setPassword("");
                                 setConfirmPassword("");
 

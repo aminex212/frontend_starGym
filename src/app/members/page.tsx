@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { apiFetch } from "@/lib/api";
+import { apiFetch, resolveApiAsset } from "@/lib/api";
 
 import {
     Dialog,
@@ -94,17 +94,9 @@ export default function MembersPage() {
     const pageSize = 10;
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            router.push("/login");
-            return;
-        }
-
         apiFetch("/api/members")
             .then((response) => {
                 if (response.status === 401) {
-                    localStorage.removeItem("token");
                     localStorage.removeItem("user");
                     router.push("/login");
                     throw new Error("Session expired");
@@ -132,18 +124,10 @@ export default function MembersPage() {
     }, [router]);
 
     async function handleMemberCreated() {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            router.push("/login");
-            return;
-        }
-
         try {
             const response = await apiFetch("/api/members");
 
             if (response.status === 401) {
-                localStorage.removeItem("token");
                 localStorage.removeItem("user");
                 router.push("/login");
                 return;
@@ -161,20 +145,12 @@ export default function MembersPage() {
     }
 
     async function handleDelete(member: Member) {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            router.push("/login");
-            return;
-        }
-
         try {
             const response = await apiFetch(`/api/members/${member._id}`, {
                 method: "DELETE",
             });
 
             if (response.status === 401) {
-                localStorage.removeItem("token");
                 localStorage.removeItem("user");
 
                 router.push("/login");
@@ -428,7 +404,7 @@ export default function MembersPage() {
                                                         <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
                                                             {member.photo ? (
                                                                 <Image
-                                                                    src={`${process.env.NEXT_PUBLIC_API_URL}/${member.photo}`}
+                                                                    src={resolveApiAsset(member.photo)!}
                                                                     alt={
                                                                         member.name
                                                                     }
@@ -691,7 +667,7 @@ export default function MembersPage() {
                                 <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full bg-muted">
                                     {selectedMember.photo ? (
                                         <Image
-                                            src={`${process.env.NEXT_PUBLIC_API_URL}/${selectedMember.photo}`}
+                                            src={resolveApiAsset(selectedMember.photo)!}
                                             alt={
                                                 selectedMember.name
                                             }

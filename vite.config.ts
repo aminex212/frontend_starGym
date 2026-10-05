@@ -2,6 +2,7 @@ import { defineConfig, type Plugin } from "vite";
 import vinext from "vinext";
 import { cloudflare } from "@cloudflare/vite-plugin";
 import rsc from "@vitejs/plugin-rsc";
+import { imagesOptimizer } from "@vinext/cloudflare/images/images-optimizer";
 
 function vinextClientAssetsSidecar(): Plugin {
   return {
@@ -22,9 +23,11 @@ function vinextClientAssetsSidecar(): Plugin {
 
 export default defineConfig({
   plugins: [
-    vinext({ rsc: false }),
+    vinext({ rsc: false,
+    images: { optimizer: imagesOptimizer() },
+}),
     rsc({ enableActionEncryption: false }),
     vinextClientAssetsSidecar(),
-    cloudflare(),
+    cloudflare({ viteEnvironment: { name: "rsc", childEnvironments: ["ssr"] } }),
   ],
 });
